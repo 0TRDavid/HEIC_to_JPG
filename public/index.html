@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>HEIC to JPG Converter</title>
+  <style>
+    #dropzone {
+      width: 400px;
+      height: 200px;
+      border: 3px dashed #888;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 50px auto;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center">Déposez vos fichiers HEIC ici (max 500)</h2>
+  <div id="dropzone">Glissez-déposez vos photos ici</div>
+  <p id="status" style="text-align:center;"></p>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const status = document.getElementById('status');
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = 'green';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = '#888';
+    });
+
+    dropzone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#888';
+
+      const files = [...e.dataTransfer.files].slice(0, 500);
+      const formData = new FormData();
+      files.forEach(file => formData.append('photos', file));
+
+      status.innerText = "Conversion en cours...";
+
+      const response = await fetch('/convert', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted.zip';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        status.innerText = "Conversion terminée !";
+      } else {
+        status.innerText = "Erreur pendant la conversion.";
+      }
+    });
+  </script>
+</body>
+</html>

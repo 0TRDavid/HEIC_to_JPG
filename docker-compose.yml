@@ -6,6 +6,5 @@ services:
     ports:
       - "5171:5171"
     volumes:
-      - .:/app
       - /app/node_modules
     command: node server.js
